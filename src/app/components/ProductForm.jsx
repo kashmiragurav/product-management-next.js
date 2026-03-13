@@ -1,13 +1,14 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ProductForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const productId = searchParams.get("id");
+export default function ProductForm() {
+
+  const router =useRouter();
+  const searchParams = useSearchParams();   
+
+  const productId = searchParams.get("id"); 
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -17,11 +18,11 @@ export default function ProductForm() {
   const discountAmount = (baseprice * discount) / 100;
   const actualPrice = baseprice - discountAmount;
 
-  const API = "https://69afa822c63dd197feb9ba5e.mockapi.io/Addproducts";
+  const API="https://69afa822c63dd197feb9ba5e.mockapi.io/Addproducts";
 
   //fetch product if editing
 
-  useEffect(() => {
+ useEffect(() => {
     if (!productId) return;
     const fetchProduct = async () => {
       const res = await fetch(`${API}/${productId}`);
@@ -83,6 +84,7 @@ export default function ProductForm() {
           onChange={(e) => setDesc(e.target.value)}
           className="border border-grey-500 p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
+
         />
 
         <input
@@ -92,6 +94,7 @@ export default function ProductForm() {
           onChange={(e) => setBasePrice(e.target.value)}
           className="border border-grey-500 p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
           required
+
         />
 
         <input
@@ -103,13 +106,15 @@ export default function ProductForm() {
           required
         />
 
+
         <div className="bg-gray-100 p-3 ">
-          <p className="text-sm text-gray-700" required>
-            Discount Amount:{" "}
-            <span className="font-semibold">{discountAmount}</span>
+          <p className="text-sm text-gray-700"required>
+            Discount Amount: <span className="font-semibold">{discountAmount}</span>
+            
           </p>
           <p className="text-sm text-gray-700" required>
             Actual Price: <span className="font-semibold">{actualPrice}</span>
+            
           </p>
         </div>
 
@@ -119,6 +124,7 @@ export default function ProductForm() {
         >
           {productId ? "Update Product" : "Add Product"}
         </button>
+       
       </form>
     </div>
   );

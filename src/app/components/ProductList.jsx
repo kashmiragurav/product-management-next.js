@@ -13,49 +13,58 @@ export default function ProductList() {
   const searchParams = useSearchParams();
   const searchFromURL = searchParams.get("search") || "";
 
-  useEffect(() => {
-    setSearch(searchFromURL);
-  }, [searchFromURL]);
-
   const API = "https://69afa822c63dd197feb9ba5e.mockapi.io/Addproducts";
 
-  // Fetch products with search
+  // Set search from URL on page load
+  useEffect(() => {
+    setSearch(searchFromURL);
+    fetchProducts(searchFromURL);
+  }, [searchFromURL]);
+
+  // Fetch products function
   const fetchProducts = async (searchValue = "") => {
     try {
       setLoading(true);
-
       let url = API;
 
-      
-      if (searchValue) {
-        url = `${API}?search=${searchValue}`;
-      }
+      // Append search query if exists
+      if (searchValue) url = `${API}?search=${searchValue}`;
 
       const res = await fetch(url);
 
-      if (!res.ok) throw new Error("Failed to fetch products");
+      if (!res.ok) {
+        if (res.status === 404) {
+          // Product not found
+          setProducts([]);
+          setNotFound(true);
+        } else {
+          throw new Error(`Failed to fetch products. Status: ${res.status}`);
+        }
+        return;
+      }
 
       const data = await res.json();
-      setNotFound(data);
 
       setProducts(data);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
+      setNotFound(data.length === 0);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setProducts([]);
+      setNotFound(true);
     } finally {
       setLoading(false);
     }
   };
-
+  // Search input effect with debounce
   useEffect(() => {
     const delay = setTimeout(() => {
       fetchProducts(search);
-
-      router.push(`/list?search=${search}`);
+      router.push(`/list?search=${search}`, { shallow: true }); // shallow avoids full reload
     }, 500);
 
     return () => clearTimeout(delay);
   }, [search]);
+
   // Delete product
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
@@ -84,13 +93,9 @@ export default function ProductList() {
         type="text"
         placeholder="Search products"
         value={search}
-        onChange={(e) => {
-          const value = e.target.value;
-          setSearch(value);
-        }}
-        className="border p-2 rounded mb-4"
+        onChange={(e) => setSearch(e.target.value)}
+        className="border p-2 rounded mb-4 w-full"
       />
-      
 
       <ul className="space-y-3">
         {products.map((product) => (
@@ -124,7 +129,9 @@ export default function ProductList() {
         ))}
       </ul>
 
-      {products.length === 0 && <p className="text- mt-4">No products found</p>}
+      {notFound && (
+        <p className="mt-4 text-red-500 font-semibold">No products found</p>
+      )}
     </div>
   );
 }
